@@ -12,16 +12,18 @@ def lambda_handler(event, context):
                     from_port = ip_permissions[ip_permission].get('FromPort')
                     to_port = ip_permissions[ip_permission].get('ToPort')
                     ip_range = ip_permissions[ip_permission].get('IpRanges')
+                    ipv6 = ip_permissions[ip_permission].get('Ipv6Ranges')
                     group_id = value[index].get('GroupId')
-                    if (from_port == 22 and ip_range == [{'CidrIp':'0.0.0.0/0'}]) or  (from_port == 3389 and ip_range == [{'CidrIp':'0.0.0.0/0'}]):
+                    if (from_port == 22 and (ip_range == [{'CidrIp':'0.0.0.0/0'}] or ipv6 == [{'CidrIpv6': '::/0'}])) or (from_port == 3389 and (ip_range == [{'CidrIp':'0.0.0.0/0'}] or ipv6 == [{'CidrIpv6': '::/0'}])):
                         ec2_client.revoke_security_group_ingress(
                             GroupId=group_id,
                             IpPermissions=[{
                                 'FromPort': from_port,
                                 'ToPort': to_port,
                                 'IpProtocol': 'tcp',
-                                'IpRanges': ip_range
-                            }]
+                                'IpRanges': ip_range,
+                                'Ipv6Ranges': ipv6
+                                }]
                             )
                     else:
                         pass
